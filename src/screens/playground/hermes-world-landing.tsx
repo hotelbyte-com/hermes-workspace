@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { PlaygroundHeroCanvas } from './components/playground-hero-canvas'
 
 const HERMES_REPO_URL = 'https://github.com/outsourc-e/hermes-workspace'
@@ -5,6 +6,32 @@ const HERMES_ROADMAP_URL = 'https://github.com/outsourc-e/hermes-workspace/blob/
 const HERMES_FEATURES_URL = 'https://github.com/outsourc-e/hermes-workspace/blob/main/FEATURES-INVENTORY.md'
 
 const externalLinkProps = { target: '_blank', rel: 'noreferrer' }
+
+const HERMES_DISCORD_URL = 'https://discord.com/invite/agentd'
+const HERMES_TWITTER_URL = 'https://twitter.com/hermesworldai'
+
+function resolvePlayTarget(): string {
+  if (typeof window === 'undefined') return '/play'
+  const override =
+    (typeof window !== 'undefined' &&
+      typeof window.localStorage !== 'undefined' &&
+      window.localStorage.getItem('HW_PLAY_TARGET')) ||
+    ''
+  if (override) return override
+  const host = window.location.hostname.toLowerCase()
+  // Public marketing host: route to early-access page until standalone is live.
+  if (host === 'hermes-world.ai' || host === 'www.hermes-world.ai') {
+    return '/early-access'
+  }
+  return '/play'
+}
+
+const trustBadges = [
+  { label: 'Open source', detail: 'Apache 2 on GitHub' },
+  { label: 'Browser playable', detail: 'Zero install needed' },
+  { label: 'Multiplayer presence', detail: 'Live world via Cloudflare' },
+  { label: 'Persistent agents', detail: 'Companions, quests, sigils' },
+]
 
 const capabilities = [
   { label: 'Persistent World', copy: 'World state keeps moving while agents continue work.', icon: '✦' },
@@ -92,11 +119,20 @@ const faqs = [
   ['Can I contribute?', 'Yes. Hermes Workspace is open source on GitHub, and HermesWorld is being developed in public. Issues, PRs, feedback, and gameplay clips all help.'],
 ]
 
+function usePlayHref(): string {
+  const [target, setTarget] = useState<string>('/play')
+  useEffect(() => {
+    setTarget(resolvePlayTarget())
+  }, [])
+  return target
+}
+
 export function HermesWorldLanding() {
+  const playHref = usePlayHref()
   return (
     <main className="min-h-screen overflow-hidden bg-[#03060a] text-[#f8f3e7] selection:bg-[#d9b35f] selection:text-[#07080d]">
       <HermesBackdrop />
-      <Header />
+      <Header playHref={playHref} />
 
       <section className="relative mx-auto grid min-h-[calc(100vh-82px)] w-full max-w-[1560px] items-center gap-10 px-4 pb-12 pt-8 sm:px-6 lg:grid-cols-[0.78fr_1.22fr] lg:px-8 lg:pb-18 lg:pt-10">
         <div className="relative z-10 max-w-2xl lg:pl-2">
@@ -106,22 +142,24 @@ export function HermesWorldLanding() {
           </div>
 
           <h1 className="max-w-[760px] text-balance font-serif text-[clamp(3.6rem,7.5vw,8.4rem)] leading-[0.82] tracking-[-0.075em] text-[#fff6df] drop-shadow-[0_20px_80px_rgba(0,0,0,.65)]">
-            Your AI agents are becoming a world.
+            Your AI agents.
+            A persistent world.
+            One portal.
           </h1>
 
           <p className="mt-7 max-w-xl text-pretty text-lg leading-8 text-[#d7d0bd]/72 sm:text-xl">
-            Enter a multiplayer agent world where your AI companions can follow, quest, report progress, and make invisible work visible.
+            HermesWorld is a persistent multiplayer world where humans and AI agents play side-by-side. Pick a name, enter Agora, take quests, collect Hermes Sigils, and watch your companions keep working between sessions.
           </p>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <a href="/play" className="group inline-flex items-center justify-center rounded-xl border border-[#ffe7a3]/50 bg-[linear-gradient(180deg,#ffe7a3,#d9a63f)] px-6 py-4 text-sm font-black uppercase tracking-[0.14em] text-[#11100b] shadow-[0_24px_80px_rgba(217,179,95,.28)] transition hover:-translate-y-0.5 hover:brightness-110">
-              ▶ Play Now <span className="ml-2 transition group-hover:translate-x-1">→</span>
+            <a href={playHref} className="group inline-flex items-center justify-center rounded-xl border border-[#ffe7a3]/55 bg-[linear-gradient(180deg,#ffe7a3,#d9a63f)] px-7 py-4 text-sm font-black uppercase tracking-[0.16em] text-[#11100b] shadow-[0_30px_90px_rgba(217,179,95,.32),inset_0_1px_0_rgba(255,255,255,.32)] transition hover:-translate-y-0.5 hover:brightness-110">
+              ▶ Enter the World <span className="ml-2 transition group-hover:translate-x-1">→</span>
             </a>
-            <a href={HERMES_REPO_URL} {...externalLinkProps} className="inline-flex items-center justify-center rounded-xl border border-[#d9b35f]/24 bg-[#0b1118]/78 px-6 py-4 text-sm font-black uppercase tracking-[0.14em] text-[#f8e4ac] shadow-[inset_0_1px_0_rgba(255,255,255,.08)] backdrop-blur-xl transition hover:border-[#d9b35f]/50 hover:bg-[#121823]">
+            <a href={HERMES_DISCORD_URL} {...externalLinkProps} className="inline-flex items-center justify-center rounded-xl border border-cyan-100/24 bg-[#0b1118]/82 px-6 py-4 text-sm font-black uppercase tracking-[0.16em] text-cyan-100/85 shadow-[inset_0_1px_0_rgba(255,255,255,.08)] backdrop-blur-xl transition hover:border-cyan-100/55 hover:bg-[#121823]">
+              Join Discord
+            </a>
+            <a href={HERMES_REPO_URL} {...externalLinkProps} className="inline-flex items-center justify-center rounded-xl border border-[#d9b35f]/24 bg-[#0b1118]/78 px-6 py-4 text-sm font-black uppercase tracking-[0.16em] text-[#f8e4ac]/85 shadow-[inset_0_1px_0_rgba(255,255,255,.08)] backdrop-blur-xl transition hover:border-[#d9b35f]/50 hover:bg-[#121823]">
               View on GitHub
-            </a>
-            <a href={HERMES_ROADMAP_URL} {...externalLinkProps} className="inline-flex items-center justify-center rounded-xl border border-[#d9b35f]/24 bg-[#0b1118]/78 px-6 py-4 text-sm font-black uppercase tracking-[0.14em] text-[#f8e4ac] shadow-[inset_0_1px_0_rgba(255,255,255,.08)] backdrop-blur-xl transition hover:border-[#d9b35f]/50 hover:bg-[#121823]">
-              Read Roadmap
             </a>
           </div>
 
@@ -138,7 +176,7 @@ export function HermesWorldLanding() {
               <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#d9b35f]/35 bg-[#d9b35f]/12 text-lg shadow-[0_0_28px_rgba(217,179,95,.16)]">🏆</span>
               <div>
                 <div className="text-[10px] font-black uppercase tracking-[0.22em] text-[#d9b35f]/70">Playable preview</div>
-                <div className="mt-1 text-sm font-bold leading-5 text-[#fff6df]">Play in the browser today. Cloud save, richer accounts, believable characters, and gameplay clips are next.</div>
+                <div className="mt-1 text-sm font-bold leading-5 text-[#fff6df]">Browser-playable today. Believable characters, cloud save, and the launch trailer drop next.</div>
               </div>
             </div>
           </div>
@@ -147,6 +185,7 @@ export function HermesWorldLanding() {
         <HeroWorldFrame />
       </section>
 
+      <TrustStrip />
       <CapabilityStrip />
       <TodayDropSection />
       <ZonesSection />
@@ -154,13 +193,13 @@ export function HermesWorldLanding() {
       <GameplayPreviewSection />
       <SigilsSection />
       <FaqSection />
-      <FinalCta />
+      <FinalCta playHref={playHref} />
       <Footer />
     </main>
   )
 }
 
-function Header() {
+function Header({ playHref }: { playHref: string }) {
   return (
     <header className="relative z-30 mx-auto mt-4 flex max-w-[1560px] items-center justify-between border-b border-[#d9b35f]/20 px-4 pb-4 sm:px-6 lg:px-8">
       <a href="/hermes-world" className="flex items-center gap-3">
@@ -177,7 +216,8 @@ function Header() {
         <a href="#sigils" className="transition hover:text-[#f8e4ac]">Sigils</a>
         <a href="#preview-video" className="transition hover:text-[#f8e4ac]">Preview</a>
         <a href="#faq" className="transition hover:text-[#f8e4ac]">FAQ</a>
-        <a href="/play" className="rounded-lg border border-[#ffe7a3]/55 bg-[linear-gradient(180deg,#ffe7a3,#d9a63f)] px-4 py-2 font-black text-[#11100b] shadow-[0_0_30px_rgba(217,179,95,.18)] transition hover:brightness-110">▶ Play</a>
+        <a href={HERMES_DISCORD_URL} {...externalLinkProps} className="rounded-lg border border-cyan-100/22 bg-cyan-100/10 px-3 py-2 text-cyan-100/82 transition hover:bg-cyan-100/16">Discord</a>
+        <a href={playHref} className="rounded-lg border border-[#ffe7a3]/55 bg-[linear-gradient(180deg,#ffe7a3,#d9a63f)] px-4 py-2 font-black text-[#11100b] shadow-[0_0_30px_rgba(217,179,95,.22)] transition hover:brightness-110">▶ Enter</a>
         <a href={HERMES_REPO_URL} {...externalLinkProps} className="rounded-lg border border-[#d9b35f]/30 bg-[#d9b35f]/10 px-4 py-2 text-[#f8e4ac] shadow-[0_0_30px_rgba(217,179,95,.08)] transition hover:bg-[#d9b35f]/18">GitHub</a>
       </nav>
     </header>
@@ -225,6 +265,25 @@ function HeroWorldFrame() {
         </div>
       </div>
     </div>
+  )
+}
+
+
+function TrustStrip() {
+  return (
+    <section className="relative mx-auto max-w-[1560px] px-4 pb-2 pt-6 sm:px-6 lg:px-8">
+      <div className="grid gap-2 rounded-2xl border border-[#d9b35f]/16 bg-[#04080d]/72 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,.05)] backdrop-blur-xl sm:grid-cols-2 lg:grid-cols-4">
+        {trustBadges.map((badge) => (
+          <div key={badge.label} className="flex items-center gap-3 px-3 py-2">
+            <span className="flex h-7 w-7 items-center justify-center rounded-md border border-[#d9b35f]/30 bg-[#d9b35f]/10 text-[#f8e4ac] shadow-[0_0_18px_rgba(217,179,95,.18)]">✪</span>
+            <div>
+              <div className="text-[11px] font-black uppercase tracking-[0.18em] text-[#f8e4ac]">{badge.label}</div>
+              <div className="text-[11px] text-[#d7d0bd]/55">{badge.detail}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
   )
 }
 
@@ -436,7 +495,7 @@ function SigilsSection() {
   )
 }
 
-function FinalCta() {
+function FinalCta({ playHref }: { playHref: string }) {
   return (
     <section className="relative overflow-hidden px-4 py-20 sm:px-6 lg:px-8">
       <div className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(3,6,10,.18),#03060a),url('/hermesworld-world.png')] bg-cover bg-center opacity-45" />
@@ -446,9 +505,9 @@ function FinalCta() {
         <h2 className="mt-3 font-serif text-4xl font-bold tracking-[-0.055em] text-[#fff6df] sm:text-6xl">Build with agents in a world, not a chat box.</h2>
         <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-[#d7d0bd]/62">Enter HermesWorld and explore the first playable layer of Hermes Workspace: zones, quests, companions, sigils, and persistent agent progression.</p>
         <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-          <a href="/play" className="rounded-xl bg-[#f8e4ac] px-7 py-4 text-sm font-black uppercase tracking-[0.14em] text-[#11100b] transition hover:-translate-y-0.5 hover:bg-white">▶ Play Now</a>
-          <a href={HERMES_REPO_URL} {...externalLinkProps} className="rounded-xl border border-white/12 bg-white/[0.055] px-7 py-4 text-sm font-black uppercase tracking-[0.14em] text-white/78 transition hover:bg-white/[0.1]">View GitHub</a>
-          <a href={HERMES_ROADMAP_URL} {...externalLinkProps} className="rounded-xl border border-white/12 bg-white/[0.055] px-7 py-4 text-sm font-black uppercase tracking-[0.14em] text-white/78 transition hover:bg-white/[0.1]">Read Roadmap</a>
+          <a href={playHref} className="rounded-xl border border-[#ffe7a3]/55 bg-[linear-gradient(180deg,#ffe7a3,#d9a63f)] px-7 py-4 text-sm font-black uppercase tracking-[0.16em] text-[#11100b] shadow-[0_30px_80px_rgba(217,179,95,.32),inset_0_1px_0_rgba(255,255,255,.32)] transition hover:-translate-y-0.5 hover:brightness-110">▶ Enter the World</a>
+          <a href={HERMES_DISCORD_URL} {...externalLinkProps} className="rounded-xl border border-cyan-100/22 bg-cyan-100/8 px-7 py-4 text-sm font-black uppercase tracking-[0.16em] text-cyan-100/85 transition hover:bg-cyan-100/14">Join Discord</a>
+          <a href={HERMES_REPO_URL} {...externalLinkProps} className="rounded-xl border border-white/12 bg-white/[0.055] px-7 py-4 text-sm font-black uppercase tracking-[0.16em] text-white/78 transition hover:bg-white/[0.1]">View GitHub</a>
         </div>
       </div>
     </section>
