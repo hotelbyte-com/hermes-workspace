@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "hermesworld-dialogue-runtime-safety.v1",
+  "generatedAt": "2026-05-09",
+  "defaults": {
+    "useMockResponses": true,
+    "actionExecutionMode": "log_only",
+    "allowExternalLlm": false,
+    "allowExternalTts": false,
+    "allowApiKeysInProject": false
+  },
+  "allowedActionKinds": [
+    "OfferQuest",
+    "GiveItem",
+    "GrantBlessing",
+    "OpenVendor",
+    "SetWaypoint",
+    "PlayEmote",
+    "None"
+  ],
+  "enforcementNotes": [
+    "Do not switch UseMockResponses to false by default.",
+    "Do not execute action intents directly from model output.",
+    "Do not add live endpoint secrets or provider tokens to Unity assets.",
+    "Keep deity dialogue as a scaffold until Atavism-safe action executors are reviewed."
+  ],
+  "inspectedRemoteArtifacts": [
+    "C:/Atavism/HermesWorld/Assets/HermesWorld/Runtime/HermesWorldDeityDialog.cs",
+    "C:/Atavism/HermesWorld/Assets/HermesWorld/Data/DeityPersonaLibrary.asset",
+    "C:/Atavism/HermesWorld/Assets/HermesWorld/Docs/MANTELLA_DEITY_DIALOG_SPEC.md"
+  ]
+}
