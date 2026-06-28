@@ -397,15 +397,35 @@ ipcMain.handle('desktop:open-logs', async () => {
 ipcMain.handle('desktop:update-check', async () => checkForAppUpdates())
 ipcMain.handle('desktop:update-state', async () => updateState)
 
+// D-017 (hotelbyte fork): 后台 headless Machine 模式
+// 不创建 BrowserWindow，只跑 agent runtime + 内嵌 local server，
+// 用户交互全部走 loop.hotelbyte.com 中央控制台。
+// 触发方式：LOOP_HEADLESS=1 electron .  或  electron . --headless
+const LOOP_HEADLESS =
+  process.env.LOOP_HEADLESS === '1' || process.argv.includes('--headless')
+
 app.whenReady().then(async () => {
   configureAutoUpdater()
-  await createWindow()
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) void createWindow()
-  })
+  if (LOOP_HEADLESS) {
+    // macOS：隐藏 Dock 图标，做真正的后台进程
+    if (process.platform === 'darwin' && app.dock && typeof app.dock.hide === 'function') {
+      app.dock.hide()
+    }
+    // headless 下仍需启动内嵌 server / gateway（createWindow 的第一件事），
+    // 但跳过窗口创建
+    await startLocalServer()
+    console.log('[loop] headless machine mode active (D-017); BrowserWindow suppressed')
+  } else {
+    await createWindow()
+    app.on('activate', () => {
+      if (BrowserWindow.getAllWindows().length === 0) void createWindow()
+    })
+  }
 })
 
 app.on('window-all-closed', () => {
+  // headless 模式下没有窗口是正常态，不能因此退出
+  if (LOOP_HEADLESS) return
   if (process.platform !== 'darwin') app.quit()
 })
 
